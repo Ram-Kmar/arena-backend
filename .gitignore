@@ -1,1 +1,22 @@
+# Rust build
 /target
+
+# Environment variables
+.env
+.env.*
+
+# Database files
+*.db
+*.sqlite
+
+# OS junk
+.DS_Store
+Thumbs.db
+
+#Editor files
+.vscode/
+.idea/
+
+#Logs
+*.log
+
