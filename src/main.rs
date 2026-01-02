@@ -2,7 +2,17 @@ mod db;
 mod models;
 mod routes;
 
-use axum::routing::{Router, get};
+use std::env;
+
+use axum::{
+    routing::{Router, get},
+    extract::Request,
+    http::{StatusCode, HeaderMap},
+    middleware::{self, Next},
+    response::Response,
+    Router,
+};
+
 use db::init_db;
 use dotenvy::dotenv;
 use routes::{create_user, get_users};
@@ -29,6 +39,7 @@ async fn main() {
 
     let app = Router::new()
         .route("/users", get(get_users).post(create_user))
+        .layer(middleware::from_fn(auth_middleware))
         .with_state(db);
 
     let port = std::env::var("PORT").unwrap_or("3000".into());
@@ -39,4 +50,25 @@ async fn main() {
     println!("Server running on http://localhost:3000");
 
     axum::serve(listener, app).await.unwrap();
+}
+
+async fn auth_middleware(
+    headers: HeaderMap,
+    request: Request,
+    next: Next,
+) -> Result<Response, StatusCode> {
+    // A. Get the key from the environment (or default to a test key)
+    let api_secret = env::var("API_SECRET").unwrap_or_else(|_| "my-secret-key".to_string());
+
+    // B. Check if the "x-api-key" header exists and matches
+    match headers.get("x-api-key") {
+        Some(key) if key == &api_secret => {
+            // Key matches! Pass the request to the next handler
+            Ok(next.run(request).await)
+        }
+        _ => {
+            // Key is missing or wrong -> Return 401 Unauthorized
+            Err(StatusCode::UNAUTHORIZED)
+        }
+    }
 }
