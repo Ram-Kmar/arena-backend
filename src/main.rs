@@ -26,6 +26,10 @@ async fn main() {
     // 1. Initialize the pool
     let db = init_db().await;
 
+    sqlx::migrate!().run(&db)
+        .await
+        .expect("Failed to run database migrations");
+
     // 2. CHECK CONNECTION HERE
     // This runs a dummy query. If it fails, the app crashes immediately (which is what you want).
     match query("SELECT 1").execute(&db).await {
