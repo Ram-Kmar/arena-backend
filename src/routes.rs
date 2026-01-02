@@ -1,10 +1,10 @@
 use axum::{extract::State, Json};
-use sqlx::SqlitePool;
+use sqlx::PgPool;
 
-use crate::models::User;
+use crate::models::{User, CreateUser};
 
 pub async fn get_users(
-    State(db): State<SqlitePool>,
+    State(db): State<PgPool>,
 ) -> Json<Vec<User>> {
     let users = sqlx::query_as::<_, User>(
         "SELECT id, username FROM users"
@@ -17,11 +17,11 @@ pub async fn get_users(
 }
 
 pub async fn create_user(
-    State(db): State<SqlitePool>,
-    Json(payload): Json<crate::models::CreateUser>,
+    State(db): State<PgPool>,
+    Json(payload): Json<CreateUser>,
 ) -> Json<User> {
     let user = sqlx::query_as::<_, User>(
-        "INSERT INTO users (username) VALUES (?) RETURNING id, username"
+        "INSERT INTO users (username) VALUES ($1) RETURNING id, username"
     )
     .bind(payload.username)
     .fetch_one(&db)
@@ -30,3 +30,4 @@ pub async fn create_user(
 
     Json(user)
 }
+

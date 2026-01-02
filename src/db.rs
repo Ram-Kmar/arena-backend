@@ -1,8 +1,8 @@
-use sqlx::SqlitePool;
+use sqlx::PgPool;
 
-pub async fn init_db() -> SqlitePool {
-    SqlitePool::connect("sqlite:app.db")
-        .await
-        .expect("Failed to connect to DB")
+pub async fn init_db() -> PgPool {
+    let database_url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
+
+    PgPool::connect(&database_url).await.expect("Failed to create pool")
 }
 
