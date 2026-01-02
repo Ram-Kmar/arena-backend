@@ -10,7 +10,6 @@ use axum::{
     http::{StatusCode, HeaderMap},
     middleware::{self, Next},
     response::Response,
-    Router,
 };
 
 use db::init_db;
