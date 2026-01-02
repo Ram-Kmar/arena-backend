@@ -16,11 +16,13 @@ async fn main() {
     //     .route("/users", get(get_users))
     //     .with_state(db);
 
-    let listener = TcpListener::bind("0.0.0.0:3000")
-        .await
-        .unwrap();
+    let port = std::env::var("PORT").unwrap_or("3000".into());
+    let addr = format!("0.0.0.0:{}", port);
 
-    println!("Server running on http://localhost:3000");
+    let listener = TcpListener::bind(addr).await.unwrap();
+
+
+    // println!("Server running on http://localhost:3000");
 
     axum::serve(listener, app).await.unwrap();
 }
